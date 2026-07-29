@@ -173,6 +173,20 @@
         </div>
     </header>
 
+    <!-- Camera Switcher -->
+    <div class="flex gap-2 mb-3">
+        <button id="cam-usb" class="header-btn active" style="text-align:center;justify-content:center;flex:1;padding:8px 4px;" onclick="switchCam('usb')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span style="font-size:9px">USB Webcam</span>
+            <span style="font-size:7px;color:var(--text-muted)">640×480</span>
+        </button>
+        <button id="cam-tapo" class="header-btn" style="text-align:center;justify-content:center;flex:1;padding:8px 4px;" onclick="switchCam('tapo')">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <span style="font-size:9px">Tapo C200C</span>
+            <span style="font-size:7px;color:var(--text-muted)">1920×1080</span>
+        </button>
+    </div>
+
     <!-- Control pills — match NuG style -->
     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:12px;">
         <!-- Baris 1 -->
@@ -249,14 +263,16 @@
 const savedTheme = localStorage.getItem('theme') || 'dark';
 document.body.setAttribute('data-theme', savedTheme);
 
-const HLS_URL='http://192.168.110.7:8011/hls/index.m3u8',SNAPSHOT_URL='/cctv.jpg',API='http://192.168.110.7:8090/api/record',MAX_DUR=600;
-let hls=null,currentMode='hls',isRecording=false,recInterval=null,snapshotInterval=null,audioEnabled=false;
+const HLS_URL_USB='http://192.168.110.7:8011/hls/index.m3u8',HLS_URL_TAPO='http://192.168.110.7:8011/hls-tapo/index.m3u8',SNAPSHOT_URL='/cctv.jpg',API='http://192.168.110.7:8090/api/record',MAX_DUR=600;
+let hls=null,currentMode='hls',currentCam='usb',isRecording=false,recInterval=null,snapshotInterval=null,audioEnabled=false;
 
-function initHLS(){
+function initHLS(url){
   const video=document.getElementById('hls-video');
+  if(!url) url=currentCam==='usb'?HLS_URL_USB:HLS_URL_TAPO;
+  if(hls){hls.destroy();hls=null;}
   if(Hls.isSupported()){
     hls=new Hls({enableWorker:true,backBufferLength:60,maxBufferLength:60,maxMaxBufferLength:120,startFragPrefetch:true,liveSyncDurationCount:3,liveDurationInfinity:true});
-    hls.loadSource(HLS_URL+'?t='+Date.now());hls.attachMedia(video);
+    hls.loadSource(url+'?t='+Date.now());hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED,function(){
       document.getElementById('stream-status').innerHTML='<span class="live-dot"></span><span style="color:#10b981;font-weight:600">LIVE</span>';
       updateInfo();
@@ -264,11 +280,11 @@ function initHLS(){
     hls.on(Hls.Events.ERROR,function(e,d){
       if(d.fatal){
         document.getElementById('stream-status').innerHTML='<span class="rec-dot"></span><span style="color:#ef4444">Buffering...</span>';
-        setTimeout(function(){hls.loadSource(HLS_URL+'?t='+Date.now());},3000);
+        setTimeout(function(){var u=currentCam==='usb'?HLS_URL_USB:HLS_URL_TAPO;hls.loadSource(u+'?t='+Date.now());},3000);
       }
     });
   }else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    video.src=HLS_URL;
+    video.src=url;
     video.addEventListener('loadedmetadata',function(){
       document.getElementById('stream-status').innerHTML='<span class="live-dot"></span><span style="color:#10b981;font-weight:600">LIVE</span>';
       updateInfo();
@@ -295,6 +311,16 @@ function startSnapshot(){
 }
 
 function stopSnapshot(){if(snapshotInterval){clearInterval(snapshotInterval);snapshotInterval=null;}}
+
+function switchCam(cam){
+  currentCam=cam;
+  document.getElementById('cam-usb').classList.toggle('active',cam==='usb');
+  document.getElementById('cam-tapo').classList.toggle('active',cam==='tapo');
+  if(currentMode==='hls'){
+    var url=cam==='usb'?HLS_URL_USB:HLS_URL_TAPO;
+    initHLS(url);
+  }
+}
 
 function switchMode(mode){
   currentMode=mode;

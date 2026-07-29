@@ -1,15 +1,25 @@
-# CCTV Acer
+# CCTV Acer - Server Monitoring & Recording
 
-Backup konfigurasi CCTV di server Acer (192.168.110.7).
+Sistem CCTV multi-source untuk monitoring dan recording di server Acer (192.168.110.7).
 
-## Service
+## Komponen
 | File | Fungsi |
-|---|---|
-| `cctv_daemon_acer.py` | Streaming HLS (VAAPI + Audio AAC) |
-| `cctv_motion_v2.py` | Deteksi gerakan (threshold 3%) |
-| `cctv_record_api.py` | API Record & Download (port 8090) |
-| `record_cctv.sh` | Script rekaman (dipanggil API) |
-| `cctv-snapshot-acer.sh` | Snapshot JPG periodik |
-| `cctv.html` | Dashboard live streaming |
+|------|--------|
+| `cctv_daemon_acer.py` | HLS streaming daemon (USB Webcam MWB-15) |
+| `cctv_motion_v2.py` | Motion detection & trigger rekaman |
+| `cctv_record_api.py` | HTTP API untuk akses file rekaman |
+| `record_cctv.sh` | Script recording ketika motion terdeteksi |
+| `cctv-snapshot-acer.sh` | Snapshot berkala dari HLS stream |
+| `cctv.html` | HLS Player dashboard |
 | `recordings.html` | Daftar rekaman |
-| `default.conf` | Konfigurasi nginx |
+
+## Service Systemd
+| Service | Port/Fungsi |
+|---------|-------------|
+| `cctv-acer-daemon` | ffmpeg HLS ke webcam USB |
+| `cctv-motion` | Motion detection + trigger record |
+| `cctv-record-api` | API port 8090 |
+| `cctv-snapshot-acer` | Snapshot tiap 1 detik |
+
+## Source Saat Ini
+- **Source 1**: USB Webcam MWB-15 (/dev/video0) - 640x480 VAAPI HLS

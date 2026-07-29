@@ -1,0 +1,13 @@
+[Unit]
+Description=CCTV Record API
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /root/cctv_record_api.py
+Restart=always
+RestartSec=3
+StandardOutput=append:/tmp/cctv_record.log
+StandardError=append:/tmp/cctv_record.log
+
+[Install]
+WantedBy=multi-user.target

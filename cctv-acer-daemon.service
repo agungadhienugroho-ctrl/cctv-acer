@@ -1,0 +1,16 @@
+[Unit]
+Description=CCTV Streaming Acer (VAAPI HLS + Audio)
+After=network-online.target local-fs.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStartPre=/bin/bash -c 'rm -f /tmp/cctv-daemon.pid; rm -rf /var/www/hls/*.ts /var/www/hls/index.m3u8'
+ExecStart=/usr/bin/python3 /root/cctv_daemon_acer.py
+Restart=always
+RestartSec=5
+StandardOutput=append:/tmp/cctv-daemon.log
+StandardError=append:/var/log/cctv_err.log
+
+[Install]
+WantedBy=multi-user.target

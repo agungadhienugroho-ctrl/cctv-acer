@@ -255,7 +255,7 @@ let hls=null,currentMode='hls',isRecording=false,recInterval=null,snapshotInterv
 function initHLS(){
   const video=document.getElementById('hls-video');
   if(Hls.isSupported()){
-    hls=new Hls({enableWorker:true,backBufferLength:30,maxBufferLength:30,maxMaxBufferLength:60,startFragPrefetch:true,liveSyncDurationCount:2});
+    hls=new Hls({enableWorker:true,backBufferLength:60,maxBufferLength:60,maxMaxBufferLength:120,startFragPrefetch:true,liveSyncDurationCount:3,liveDurationInfinity:true});
     hls.loadSource(HLS_URL+'?t='+Date.now());hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED,function(){
       document.getElementById('stream-status').innerHTML='<span class="live-dot"></span><span style="color:#10b981;font-weight:600">LIVE</span>';

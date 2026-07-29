@@ -1,0 +1,13 @@
+[Unit]
+Description=CCTV Tapo Motion Detection
+After=network.target cctv-snapshot-tapo.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /root/cctv_motion_tapo.py
+Restart=always
+RestartSec=3
+User=root
+
+[Install]
+WantedBy=multi-user.target

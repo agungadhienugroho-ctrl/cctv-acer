@@ -15,8 +15,8 @@ CHECK_INTERVAL = 3       # seconds between checks
 MIN_RECORD = 15           # minimum recording duration (sec)
 MAX_RECORD = 600          # max recording duration (sec)
 COOLDOWN = 30             # sec after stop before new trigger
-CHANGE_PCT = 3.0          # minimum % pixels changed (filters small noise/shadows)
-PIXEL_THRESHOLD = 40     # per-pixel grayscale diff to count as changed
+CHANGE_PCT = 2.0          # minimum % pixels changed (filters small noise/shadows)
+PIXEL_THRESHOLD = 30     # per-pixel grayscale diff to count as changed
 CONSECUTIVE_FRAMES = 3    # consecutive motion frames before trigger
 
 try:

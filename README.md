@@ -2,27 +2,57 @@
 
 Sistem CCTV multi-source untuk monitoring dan recording di server Acer (192.168.110.7).
 
-## Komponen
+## System Architecture
+```
+Acer (192.168.110.7)
+├── USB Webcam MWB-15 (/dev/video0)
+│   ├── cctv-acer-daemon → HLS /hls/ (640×480 VAAPI)
+│   ├── cctv-snapshot-acer → snapshot.jpg tiap 1s
+│   ├── cctv-motion → motion detection → trigger rekaman
+│   ├── cctv-record-api (port 8090)
+│   └── Rekaman: /storage1/CCTV/Rekaman/
+│
+└── Tapo C200C (RTSP 192.168.110.21)
+    ├── cctv-tapo-daemon → HLS /hls-tapo/ (1920×1080)
+    ├── cctv-snapshot-tapo → snapshot.jpg tiap 1s
+    ├── cctv-motion-tapo → motion detection → trigger rekaman
+    ├── cctv-record-tapo-api (port 8091)
+    └── Rekaman: /storage1/CCTV/Tapo c200c/
+```
+
+## System Services
+| Service | Fungsi | Status |
+|---------|--------|--------|
+| `cctv-acer-daemon` | HLS USB Webcam (640×480) | ✅ |
+| `cctv-snapshot-acer` | Snapshot USB | ✅ |
+| `cctv-motion` | Motion USB + trigger record | ✅ |
+| `cctv-record-api` | API port 8090 | ✅ |
+| ~~ | ~~ | ~~ |
+| `cctv-tapo-daemon` | HLS Tapo C200C (1920×1080) | ✅ |
+| `cctv-snapshot-tapo` | Snapshot Tapo | ✅ |
+| `cctv-motion-tapo` | Motion Tapo + trigger record | ✅ |
+| `cctv-record-tapo-api` | API port 8091 | ✅ |
+
+## Access
+- **CCTV Dashboard**: `http://192.168.110.7:8011/cctv.html`
+- **Webcam Recordings**: `http://192.168.110.7:8011/recordings.html`
+- **Tapo Recordings**: `http://192.168.110.7:8011/recordings-tapo.html`
+- **USB HLS**: `http://192.168.110.7:8011/hls/index.m3u8`
+- **Tapo HLS**: `http://192.168.110.7:8011/hls-tapo/index.m3u8`
+
+## Files
 | File | Fungsi |
 |------|--------|
-| `cctv_daemon_acer.py` | HLS streaming daemon (USB Webcam MWB-15) |
-| `cctv-tapo-daemon.sh` | HLS streaming daemon (Tapo C200C RTSP) |
-| `cctv_motion_v2.py` | Motion detection & trigger rekaman |
-| `cctv_record_api.py` | HTTP API untuk akses file rekaman |
-| `record_cctv.sh` | Script recording ketika motion terdeteksi |
-| `cctv-snapshot-acer.sh` | Snapshot berkala dari HLS stream |
-| `cctv.html` | HLS Player dashboard (multi-camera) |
-| `recordings.html` | Daftar rekaman |
-
-## Service Systemd
-| Service | Port/Fungsi |
-|---------|-------------|
-| `cctv-acer-daemon` | ffmpeg HLS ke webcam USB (640x480) |
-| `cctv-tapo-daemon` | ffmpeg HLS ke Tapo C200C (1920x1080) |
-| `cctv-motion` | Motion detection + trigger record |
-| `cctv-record-api` | API port 8090 |
-| `cctv-snapshot-acer` | Snapshot tiap 1 detik |
-
-## Source Saat Ini
-- **Source 1**: USB Webcam MWB-15 (/dev/video0) - 640x480 VAAPI HLS
-- **Source 2**: Tapo C200C (RTSP) - 1920x1080 Full HD HLS
+| `cctv_daemon_acer.py` | USB Webcam HLS daemon |
+| `cctv_motion_v2.py` | USB motion detection |
+| `cctv_record_api.py` | USB record API (port 8090) |
+| `record_cctv.sh` | USB recording script |
+| `cctv-snapshot-acer.sh` | USB snapshot loop |
+| `cctv-tapo-daemon.sh` | Tapo C200C HLS daemon |
+| `cctv_motion_tapo.py` | Tapo motion detection |
+| `cctv_record_tapo_api.py` | Tapo record API (port 8091) |
+| `record_tapo.sh` | Tapo recording script |
+| `cctv-snapshot-tapo.sh` | Tapo snapshot loop |
+| `cctv.html` | Multi-camera player |
+| `recordings.html` | USB recordings list |
+| `recordings-tapo.html` | Tapo recordings list |

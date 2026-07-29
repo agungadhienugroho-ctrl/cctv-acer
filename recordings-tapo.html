@@ -1,101 +1,103 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tapo Recordings - NuG Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root { --bg: #0a0a1a; --bg-card: rgba(255,255,255,0.05); --bg-card-strong: rgba(255,255,255,0.08); --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.12); --text: #e0e0e0; --text-dim: #888; --text-muted: #555; --glow-1: rgba(59,130,246,0.08); --glow-2: rgba(16,185,129,0.06); --glow-3: rgba(139,92,246,0.05); --grid-line: rgba(255,255,255,0.02); --glass-blur: 40px; }
-        [data-theme="light"] { --bg: #f0f2f5; --bg-card: rgba(255,255,255,0.7); --bg-card-strong: rgba(255,255,255,0.85); --border: rgba(0,0,0,0.08); --border-strong: rgba(0,0,0,0.12); --text: #1a1a2e; --text-dim: #555; --text-muted: #888; --glow-1: rgba(59,130,246,0.05); --glow-2: rgba(16,185,129,0.04); --glow-3: rgba(139,92,246,0.03); --grid-line: rgba(0,0,0,0.03); --glass-blur: 20px; }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; transition: background 0.4s ease, color 0.4s ease; }
-        .bg-glow { position: fixed; inset: 0; z-index: 0; background: radial-gradient(600px circle at 20% 30%, var(--glow-1) 0%, transparent 70%), radial-gradient(500px circle at 80% 60%, var(--glow-2) 0%, transparent 70%), radial-gradient(400px circle at 50% 80%, var(--glow-3) 0%, transparent 70%); animation: pulse-bg 8s ease-in-out infinite alternate; }
-        @keyframes pulse-bg { 0% { opacity: 0.6; } 100% { opacity: 1; } }
-        .grid-overlay { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%); }
-        .content { position: relative; z-index: 1; }
-        .glass { background: var(--bg-card); backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--border); border-radius: 16px; transition: all 0.4s ease; }
-        .glass-strong { background: var(--bg-card-strong); backdrop-filter: blur(var(--glass-blur)); border: 1px solid var(--border-strong); border-radius: 12px; }
-        .header-btn { background: var(--bg-card); border: 1px solid var(--border); color: var(--text-dim); padding: 6px 12px; border-radius: 12px; font-size: 11px; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 3px; font-weight: 500; }
-        .header-btn:hover { background: var(--bg-card-strong); border-color: var(--border-strong); color: var(--text); transform: translateY(-1px); }
-        .header-btn.active { background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(59,130,246,0.1)); border-color: rgba(59,130,246,0.4); color: #60a5fa; }
-        .rec-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tapo Rekaman</title>
+<style>
+:root {
+    --bg: #0a0a1a;
+    --bg-card: rgba(255,255,255,0.05);
+    --bg-card-strong: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.08);
+    --border-strong: rgba(255,255,255,0.12);
+    --text: #e0e0e0;
+    --text-dim: #888;
+    --text-muted: #555;
+    --glass-blur: 40px;
+}
+[data-theme="light"] {
+    --bg: #f0f2f5;
+    --bg-card: rgba(255,255,255,0.7);
+    --bg-card-strong: rgba(255,255,255,0.85);
+    --border: rgba(0,0,0,0.08);
+    --border-strong: rgba(0,0,0,0.12);
+    --text: #1a1a2e;
+    --text-dim: #555;
+    --text-muted: #888;
+    --glass-blur: 20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);padding:15px;min-height:100vh}
+.sticky-top{position:sticky;top:0;z-index:10;background:var(--bg);padding-bottom:10px}
+#pl{background:#000;border-radius:12px;overflow:hidden;max-width:100%;display:none;margin-bottom:10px;position:sticky;top:50px;z-index:9}
+video{width:100%;max-height:500px;display:block;background:#000}
+.fl{list-style:none;display:grid;gap:8px}
+.fi{background:var(--bg-card);padding:12px 16px;border-radius:10px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s}
+.fi:hover{background:var(--bg-card-strong);border-color:var(--border-strong)}
+.fi.act{background:rgba(139,92,246,0.15);border-color:#8b5cf6}
+.fn{color:var(--text);font-size:14px}
+.fm{color:var(--text-dim);font-size:12px}
+.fs{color:#8b5cf6;font-weight:bold;font-size:13px}
+.ld{padding:30px;text-align:center;color:var(--text-dim)}
+.em{color:var(--text-muted);text-align:center;padding:40px}
+.rb{background:var(--bg-card);color:var(--text-dim);border:1px solid var(--border);padding:8px 14px;border-radius:8px;cursor:pointer;margin-bottom:0;font-size:13px;transition:all .2s}
+.rb:hover{background:var(--bg-card-strong);border-color:var(--border-strong);color:var(--text)}
+.bg{display:inline-block;background:#8b5cf6;color:#fff;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:bold}
+</style>
 </head>
 <body>
-<div class="bg-glow"></div>
-<div class="grid-overlay"></div>
-<div class="content p-4 max-w-4xl mx-auto">
-    <header class="flex justify-between items-center mb-4">
-        <div class="flex items-center gap-3">
-            <h1 class="text-lg font-black" style="color:var(--text)">
-                <span style="color:#8b5cf6">🎥</span> Tapo Recordings
-            </h1>
-            <span class="text-[10px] glass px-2 py-0.5 rounded-full" style="color:#8b5cf6">1920×1080</span>
-        </div>
-        <div class="flex items-center gap-2">
-            <a href="/cctv.html" class="header-btn" style="padding:8px;justify-content:center;" title="CCTV">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            </a>
-            <button onclick="location.reload()" class="header-btn" style="padding:8px;justify-content:center;">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-9-9c2.52 0 4.93.94 6.74 2.5L21 8"/><path d="M21 3v5h-5"/></svg>
-            </button>
-        </div>
-    </header>
 
-    <!-- Stats -->
-    <div class="glass-strong p-3 mb-3 flex justify-between items-center text-xs" style="color:var(--text-dim)">
-        <span id="stats-count">0 rekaman</span>
-        <span id="stats-size">0 MB</span>
-    </div>
-
-    <!-- Recordings list -->
-    <div class="glass p-4">
-        <div id="recordings-list" class="space-y-1.5" style="font-size:11px;color:var(--text-dim)">
-            <div class="text-center py-8" style="color:var(--text-muted)">Loading...</div>
-        </div>
-    </div>
+<div class="sticky-top">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><a href="/cctv.html" style="display:inline-flex;align-items:center;gap:4px;padding:6px 10px;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);text-decoration:none;font-size:13px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Kembali</a><span style="display:flex;align-items:center;gap:10px"><span style="color:#8b5cf6;font-size:22px;font-weight:bold"> Tapo Rekaman</span><span id="cnt" class="bg">0</span></span></div>
+  <div id="pl">
+    <video id="vp" controls></video>
+  </div>
+  <button class="rb" onclick="load()">Refresh</button>
 </div>
 
+<div id="ls" class="ld">Memuat daftar rekaman Tapo...</div>
+
 <script>
-const API = 'http://192.168.110.7:8091';
-let currentPage = 0;
-const PAGE_SIZE = 50;
+const A='http://192.168.110.7:8091';
+const ls=document.getElementById('ls'),cn=document.getElementById('cnt'),vp=document.getElementById('vp');
 
-async function loadRecordings(){
-    try{
-        const r = await fetch(API + '/api/recordings');
-        const files = await r.json();
-        const l = document.getElementById('recordings-list');
-        document.getElementById('stats-count').textContent = files.length + ' rekaman';
-        const totalMB = files.reduce((a,f) => a + (f.size || 0), 0) / 1048576;
-        document.getElementById('stats-size').textContent = totalMB.toFixed(1) + ' MB';
+// Ikuti theme dari dashboard utama
+const t=localStorage.getItem('theme');
+if(t) document.documentElement.setAttribute('data-theme',t);
 
-        if(!files.length){
-            l.innerHTML = '<div class="text-center py-8" style="color:var(--text-muted)">Belum ada rekaman Tapo</div>';
-            return;
-        }
-        l.innerHTML = files.map(function(f){
-            const sz = f.size > 1048576 ? (f.size/1048576).toFixed(1) + ' MB' : (f.size/1024).toFixed(0) + ' KB';
-            const dl = API + '/api/download/' + encodeURIComponent(f.file);
-            return '<div class="flex justify-between items-center py-2 px-3 rounded-lg" style="background:var(--bg-card)">' +
-                '<div class="flex flex-col min-w-0">' +
-                '<span style="color:var(--text);font-weight:500;font-size:12px">' + f.date + '</span>' +
-                '<span style="color:var(--text-muted);font-size:10px">' + sz + ' • ' + f.file + '</span>' +
-                '</div>' +
-                '<div class="flex gap-1.5">' +
-                '<a href="' + dl + '" target="_blank" class="header-btn" style="padding:4px 10px;text-decoration:none">▶ Play</a>' +
-                '<a href="' + dl + '" download class="header-btn" style="padding:4px 10px;text-decoration:none" title="Download">⬇</a>' +
-                '</div>' +
-                '</div>';
-        }).join('');
-    }catch(e){
-        document.getElementById('recordings-list').innerHTML = '<div class="text-center py-8" style="color:var(--text-muted)">Error loading: ' + e.message + '</div>';
-    }
+async function load(){
+  try{
+    ls.innerHTML='<div class="ld">Memuat daftar rekaman Tapo...</div>';
+    const r=await fetch(A+'/api/recordings');
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    cn.textContent=d.length;
+    if(!d.length){ls.innerHTML='<div class="em">Belum ada rekaman Tapo</div>';return;}
+    d.sort(function(a,b){return b.date.localeCompare(a.date)||b.file.localeCompare(a.file)});
+    let h='<ul class="fl">';
+    d.forEach(function(f){
+      var sizeMB=(f.size/1024/1024).toFixed(1);
+      h+='<li class="fi" onclick="play(\''+f.file+'\')" ondblclick="dl(\''+f.file+'\')">'+
+        '<div><div class="fn">'+f.file+'</div><div class="fm">'+f.date+'</div></div>'+
+        '<div class="fs">'+sizeMB+' MB</div></li>';
+    });
+    h+='</ul>';
+    ls.innerHTML=h;
+  }catch(e){ls.innerHTML='<div class="em">Gagal: '+e.message+'</div>';}
 }
 
-document.addEventListener('DOMContentLoaded', loadRecordings);
+function play(fn){
+  document.getElementById('pl').style.display='block';
+  vp.src=A+'/api/download/'+encodeURIComponent(fn);
+  vp.load();
+  vp.play();
+  document.querySelectorAll('.fi').forEach(function(e){e.classList.remove('act');});
+}
+
+function dl(fn){window.open(A+'/api/download/'+encodeURIComponent(fn),'_blank');}
+
+load();
 </script>
 </body>
 </html>

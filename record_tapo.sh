@@ -5,8 +5,8 @@
 STORAGE_DIR="/storage1/CCTV/Tapo c200c"
 mkdir -p "$STORAGE_DIR"
 
-# Cleanup old recordings > 7 days
-find "$STORAGE_DIR" -name "cctv_*.mp4" -mtime +7 -delete 2>/dev/null
+# Cleanup old recordings > 3 hari
+find "$STORAGE_DIR" -name "cctv_*.mp4" -mtime +3 -delete 2>/dev/null
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 OUTPUT="$STORAGE_DIR/cctv_${TIMESTAMP}.mp4"

@@ -92,10 +92,10 @@ Strategi 3 lapis:
 
 | ✅ Item | Nilai |
 |---|---|
-| Path rekaman | `/mnt/wd2tb/CCTV/Rekaman` |
-| Disk | WD 2TB (`/dev/sdb1`, ext4) |
-| UUID | `40c4a267-ea8a-4bfe-b419-42c1cf476df3` |
-| Mount | `/etc/fstab` + `x-systemd.automount` |
+| **Path rekaman (utama)** | `/mnt/wd2tb/CCTV/Rekaman` |
+| **Disk utama** | WD 2TB (`ext4`, UUID `40c4a267-…`) |
+| **Disk cadangan** | Toshiba 500GB (`exfat`, UUID `894C-6910`) → `/mnt/hdd_toshiba` |
+| **Mount** | `/etc/fstab` + `x-systemd.automount` (dua-duanya by UUID) |
 | Retensi | **2 hari** (config via `RETENTION_HARI`) |
 | Pemakaian | ~2.5–6 GB/hari |
 

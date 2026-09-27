@@ -22,14 +22,11 @@ Arsitektur CCTV rumah yang berjalan per September 2026.
 ├── cctv.html                  # Dashboard (di-host di Acer :8011)
 ├── recordings.html            # Halaman daftar rekaman
 │
-├── cctv_daemon_acer.py        # ⚠️ LEGACY — Acer, sudah di-disable
-├── cctv-acer-daemon.service   # ⚠️ LEGACY — sudah di-disable
-├── cctv_watchdog.py           # ⚠️ LEGACY — Acer, sudah di-disable
-├── cctv-snapshot-acer.sh      # ⚠️ LEGACY — digantikan snapshot-t470
-│
 ├── cctv_record_tapo_api.py    # ✅ Tapo (Acer) — JANGAN DISENTUH
 ├── cctv_motion_tapo.py        # ✅ Tapo (Acer) — JANGAN DISENTUH
 ├── cctv-snapshot-tapo.sh      # ✅ Tapo (Acer) — JANGAN DISENTUH
+├── record_tapo.sh             # ✅ Tapo (Acer)
+├── recordings-tapo.html       # ✅ Tapo (Acer)
 │
 └── t470s/                     # ⭐ Setup T470s (AKTIF, semua webcam)
     ├── cctv_detect_cam.sh       # Auto-detect device webcam

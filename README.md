@@ -105,6 +105,20 @@ Strategi 3 lapis:
 > ```
 > `/mnt/hdd_toshiba` (HDD lama) **tidak lagi terpasang** — fstab entry
 > masih ada tapi UUID `894C-6910` sudah hilang dari sistem.
+>
+> ### 🔴 Kenapa devmon dimatikan
+>
+> Pada 27 Sep 14:58, HDD **re-enumerate** (bridge JMicron reset sendiri).
+> `devmon`/`udevil` (CasaOS) langsung **unmount `/mnt/wd2tb`** lalu plan
+> remount ke `/media/devmon/`. Karena disk kembali sebagai `/dev/sda`
+> (dari `sdb`), fstab `x-systemd.automount` gagal detect → `/mnt/wd2tb`
+> tidak pernah mount lagi → record API balas **HTTP 500** → halaman
+> rekaman kosong.
+>
+> `devmon@devmon.service` sudah di-**disable** supaya tidak berebut mount.
+> Mounting HDD sekarang murni ditangani systemd + `cctv-remount-wd2tb.timer`.
+> Disk lain yang pernah di-mount devmon tidak terpengaruh — `devmon`
+> hanya managing device yang belum punya entry fstab.
 
 ### Safety Guard
 

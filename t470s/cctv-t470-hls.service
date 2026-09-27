@@ -1,0 +1,15 @@
+[Unit]
+Description=CCTV Webcam HLS Streaming (T470s, VAAPI + USB mic)
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/root/cctv_t470_hls.sh
+Restart=always
+RestartSec=5
+User=root
+WorkingDirectory=/root
+
+[Install]
+WantedBy=multi-user.target

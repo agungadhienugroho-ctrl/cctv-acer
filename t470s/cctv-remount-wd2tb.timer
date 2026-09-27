@@ -1,0 +1,14 @@
+[Unit]
+Description=Cek & pulihkan mount WD 2TB tiap 5 menit (T470s)
+Documentation=file:///root/cctv_remount_wd2tb.sh
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+
+# Kalau script yang terakhir gagal, coba lagi dalam 1 menit
+# (HDD mungkin masih "settle" setelah dicabut-colok)
+OnFailure=1min
+
+[Install]
+WantedBy=timers.target

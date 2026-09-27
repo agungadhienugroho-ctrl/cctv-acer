@@ -1,0 +1,15 @@
+[Unit]
+Description=CCTV Auto-Remount WD 2TB (T470s) — pulihkan mount kalau HDD ke-disconnect
+Documentation=file:///root/cctv_remount_wd2tb.sh
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/root/cctv_remount_wd2tb.sh
+
+# Kalau HDD tidak ketemu, script menunggu 5x10s = 50 detik
+TimeoutStartSec=120
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=cctv-remount

@@ -30,13 +30,31 @@ import cv2
 import numpy as np
 
 
-def api_call(endpoint):
-    try:
-        r = urllib.request.urlopen(f"{API_URL}/{endpoint}", timeout=5)
-        return json.loads(r.read())
-    except Exception as e:
-        logging.error(f"API error: {e}")
-        return None
+def api_call(endpoint, timeout=30, retries=3):
+    """Panggil API record.
+
+    Timeout diperbesar (default 30s, bukan 5s) karena endpoint
+    record/stop harus mengexec +wait ffmpeg sampai mati, yang
+    bisa makan belasan detik kalau file besar / disk lambat.
+
+    Ditambah retry: kalau timeout, coba lagi. Tanpa ini, satu
+    timeout menyebabkan ffmpeg orphan yang nulis file tak
+    terbatas (teramati file 4.3GB karena hal ini).
+    """
+    last_err = None
+    for attempt in range(1, retries + 1):
+        try:
+            r = urllib.request.urlopen(f"{API_URL}/{endpoint}", timeout=timeout)
+            return json.loads(r.read())
+        except Exception as e:
+            last_err = e
+            logging.warning(
+                f"API error ({endpoint}) percobaan {attempt}/{retries}: {e}"
+            )
+            if attempt < retries:
+                time.sleep(2 * attempt)
+    logging.error(f"API GAGAL total ({endpoint}): {last_err}")
+    return None
 
 
 def grab_frame_cv():
@@ -89,6 +107,19 @@ def force_stop():
     result = api_call("record/stop")
     if result:
         logging.info(f"Paksa stop: {result}")
+        return
+
+    # Fallback: API gagal total (mis. timeout semua retry).
+    # Jangan biarkan ffmpeg orphan menulis file tak terbatas.
+    logging.warning("API stop gagal -> fallback: kill proses rekaman")
+    killed = subprocess.run(
+        ["pkill", "-f", r"hls/index.m3u8.*-f mp4"],
+        capture_output=True, text=True,
+    )
+    if killed.returncode == 0:
+        logging.warning("Fallback: proses rekaman di-kill via pkill")
+    else:
+        logging.error("Fallback: tidak ada proses rekaman untuk di-kill")
 
 
 def main():

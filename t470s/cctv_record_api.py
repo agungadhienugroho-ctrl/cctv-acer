@@ -7,6 +7,7 @@ RECORD_DIR = "/mnt/wd2tb/CCTV/Rekaman"
 LOG_FILE = "/tmp/cctv-record-api.log"
 SERVER_PORT = 8091
 MAX_DURATION_SECONDS = 60
+MAX_FILE_BYTES = 500 * 1024 * 1024   # 500MB fail-safe per file
 
 logging.basicConfig(level=logging.INFO, handlers=[logging.FileHandler(LOG_FILE), logging.StreamHandler(sys.stdout)])
 os.makedirs(RECORD_DIR, exist_ok=True)
@@ -79,6 +80,16 @@ class Handler(http.server.BaseHTTPRequestHandler):
                     script_path = "/root/record_cctv.sh"
                     current_recording_process = subprocess.Popen([script_path, current_recording_filename])
                     recording_start_time = time.time()
+                    if WATCHDOG_ENABLED:
+                        try:
+                            _wd = threading.Thread(
+                                target=_watchdog,
+                                args=(current_recording_filename,
+                                      current_recording_process),
+                                daemon=True)
+                            _wd.start()
+                        except Exception as e:
+                            print(f"[watchdog] gagal start: {e}")
                     response_data = {"status": "recording", "file": current_recording_filename}
             elif path == "/api/record/stop":
                 if current_recording_process and current_recording_process.poll() is None:
@@ -194,6 +205,61 @@ def run_server():
             logging.error("Server error: %s, restarting...", str(e))
             time.sleep(1)
             continue
+
+# --- WATCHDOG: auto-stop rekaman yg melebihi batas durasi ---
+# Proteksi sisi server: walau client lupa stop / stop-nya timeout,
+# proses rekaman tetap dihentikan otomatis.
+WATCHDOG_ENABLED = True
+
+
+def _stop_recording_process(proc, filename, reason):
+    """Kill proses rekaman dengan rapi (terminate lalu kill)."""
+    if not proc or proc.poll() is not None:
+        return
+    try:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except Exception:
+            proc.kill()
+            try:
+                proc.wait(timeout=5)
+            except Exception:
+                pass
+    except Exception:
+        pass
+    try:
+        size_mb = os.path.getsize(filename) // (1024 * 1024)
+        print(f"[watchdog] auto-stop ({reason}): {filename} ({size_mb} MB)")
+    except Exception:
+        print(f"[watchdog] auto-stop ({reason}): {filename}")
+    with open(RECORD_DIR + "/../watchdog.log", "a") as fh:
+        fh.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} {reason} {filename}\n")
+
+
+def _watchdog(recording_file, proc):
+    """Background thread: stop rekaman kalau terlalu lama."""
+    started = time.time()
+    while True:
+        time.sleep(5)
+        if proc.poll() is not None:
+            return  # ffmpeg sudah mati sendiri
+        elapsed = time.time() - started
+        if elapsed >= MAX_DURATION_SECONDS:
+            _stop_recording_process(proc, recording_file,
+                                   f"max_duration {MAX_DURATION_SECONDS}s")
+            return
+        # Fail-safe: kalau file jadi terlalu besar, stop juga
+        try:
+            if os.path.exists(recording_file):
+                if os.path.getsize(recording_file) > MAX_FILE_BYTES:
+                    _stop_recording_process(
+                        proc, recording_file,
+                        f"max_filesize {MAX_FILE_BYTES // (1024*1024)}MB")
+                    return
+        except Exception:
+            pass
+
 
 if __name__ == "__main__":
     run_server()

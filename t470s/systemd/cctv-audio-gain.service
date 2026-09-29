@@ -1,0 +1,9 @@
+[Unit]
+Description=CCTV — restore capture gain webcam (MWB-15)
+After=sound.target
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'amixer -c 0 sset Mic 256 2>/dev/null || true'
+RemainAfterExit=yes
+[Install]
+WantedBy=multi-user.target

@@ -33,10 +33,10 @@ echo "[hls] memakai webcam: $CAM_DEV" >&2
 ffmpeg -nostdin \
     -vaapi_device /dev/dri/renderD128 \
     -f v4l2 -input_format mjpeg -video_size 640x480 -i "$CAM_DEV" \
-    -f alsa -ac 1 -i hw:0,0 \
+    -f alsa -ac 2 -ar 48000 -i hw:0,0 \
     -vf "format=nv12,hwupload" \
     -c:v h264_vaapi -qp 25 \
-    -c:a aac -b:a 96k -ar 44100 -ac 1 \
+    -c:a aac -b:a 96k -ar 48000 -ac 2 \
     -af "volume=1.5" \
     -g 30 \
     -f hls -hls_time 4 -hls_list_size 3 -hls_flags delete_segments \
